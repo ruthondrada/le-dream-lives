@@ -16,20 +16,26 @@ try:
     filtered_df = df[df['channel_name'] == filter_value]
     #print(filtered_df.dtypes)
     print(filtered_df)
+    
     with open('output.txt', 'w') as file:
         for index, row in filtered_df.iterrows():
             channel_name = row['channel_name']
             postalcode = int(row['postcode'])
             str_postcode = str(postalcode)
-            #file.write(channel_name + ":" + str_postcode )
-            url = "https://www.onemap.gov.sg/api/common/elastic/search?searchVal="+ str_postcode + "&returnGeom=Y&getAddrDetails=Y"
-            response = requests.request("GET", url, headers=headers)
-            file.write(response.text+'\n')
-
-
+            url = "https://www.onemap.gov.sg/api/common/elastic/search?searchVal="+ str_postcode + "&returnGeom=N&getAddrDetails=Y"
+            response_json = requests.request("GET", url, headers=headers).json()
+            full_address = response_json["results"][0]["BLK_NO"] + " " + response_json["results"][0]["ROAD_NAME"]
+            print(full_address)
+            filtered_df['New Column'] = full_address
+                
+            #parseResponse = response.json()
+            file.write(full_address+'\n')
         # print("Column1 Value:", channel_name)
         # print("Column2 Value:", str_postcode)
-
+    # updated_excel_path = 'updated_file.xlsx'
+    # df.to_excel(updated_excel_path, index=False)
+    #print(f"Updated data has been saved to {updated_excel_path}")
+  
 except pd.errors.ParserError as e:
     print("Error", e)
 #print(filtered_df)
